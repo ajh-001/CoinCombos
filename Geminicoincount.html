@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>UK Money Combinations</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Custom scrollbar for horizontal mobile table scrolling */
+    .hide-scrollbar::-webkit-scrollbar { height: 6px; }
+    .hide-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+    .hide-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    
+    /* Hide native number input arrows for a cleaner custom UI */
+    input[type=number]::-webkit-inner-spin-button, 
+    input[type=number]::-webkit-outer-spin-button { 
+      -webkit-appearance: none; 
+      margin: 0; 
+    }
+    input[type=number] {
+      -moz-appearance: textfield; /* Firefox */
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased">
+
+  <!-- Main Container: Uses a flex column on mobile, and a 12-column grid on desktop -->
+  <main class="max-w-6xl mx-auto px-4 py-6 lg:py-10 grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 min-h-screen content-start">
+    
+    <!-- LEFT COLUMN: Controls -->
+    <div class="lg:col-span-5 flex flex-col gap-5 lg:gap-6">
+      
+      <header class="text-center lg:text-left pt-2">
+        <h1 class="text-2xl lg:text-3xl font-extrabold text-slate-900 tracking-tight">Coin Combos</h1>
+      </header>
+
+      <!-- 1. Primary Result Card -->
+      <div class="bg-blue-600 text-white rounded-2xl p-6 shadow-lg shadow-blue-600/20 text-center relative overflow-hidden">
+        <div class="absolute -top-10 -right-10 w-32 h-32 bg-white opacity-10 rounded-full blur-2xl"></div>
+        <div class="absolute -bottom-10 -left-10 w-24 h-24 bg-white opacity-10 rounded-full blur-xl"></div>
+        
+        <p class="text-blue-100 font-medium text-sm mb-1 relative z-10">Target Amount</p>
+        <h2 class="text-4xl lg:text-5xl font-bold tracking-tight mb-4 relative z-10">£<span id="amountLabel">1.00</span></h2>
+        
+        <div class="bg-white/20 rounded-xl p-3 backdrop-blur-sm relative z-10">
+          <p class="text-blue-50 text-xs uppercase tracking-wider font-semibold mb-1">Total Combinations</p>
+          <p id="resultCount" class="text-2xl lg:text-3xl font-bold">0</p>
+        </div>
+      </div>
+
+      <!-- 2. Controls Card with Custom Stepper UI -->
+      <section class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+        <div class="flex items-center justify-between mb-5">
+          <label for="amountSlider" class="font-semibold text-slate-700">Set Amount</label>
+          
+          <div class="flex items-center bg-slate-50 border border-slate-200 rounded-lg p-1">
+            <button id="btnMinus" class="w-8 h-8 flex items-center justify-center text-xl font-medium text-slate-600 bg-white rounded shadow-sm hover:bg-slate-50 active:scale-95 transition-all focus:outline-none focus:ring-2 focus:ring-blue-400">−</button>
+            
+            <div class="relative w-20">
+              <span class="absolute left-2 top-1/2 -translate-y-1/2 text-slate-400 font-medium text-sm">£</span>
+              <input 
+                type="number" 
+                id="amountInput" 
+                min="0.01" max="20" step="0.01" value="1.00"
+                inputmode="decimal"
+                class="w-full pl-5 pr-1 py-1 bg-transparent text-center font-bold text-slate-800 focus:outline-none"
+              >
+            </div>
+
+            <button id="btnPlus" class="w-8 h-8 flex items-center justify-center text-xl font-medium text-slate-600 bg-white rounded shadow-sm hover:bg-slate-50 active:scale-95 transition-all focus:outline-none focus:ring-2 focus:ring-blue-400">+</button>
+          </div>
+        </div>
+        
+        <div class="relative pt-1 pb-1">
+          <input 
+            type="range" 
+            id="amountSlider" 
+            min="1" max="2000" value="100" step="1"
+            class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+          >
+          <div class="flex justify-between text-xs text-slate-400 mt-2 font-medium">
+            <span>1p</span>
+            <span>£20</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. Rolled-up Money Box Card -->
+      <details class="group bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden" open>
+        <summary class="flex justify-between items-center cursor-pointer p-5 font-semibold text-slate-700 list-none [&::-webkit-details-marker]:hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500">
+          <span class="flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-400"><rect x="3" y="8" width="18" height="12" rx="2"/><path d="M12 12v.01"/><path d="M7 8v-2a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2"/></svg>
+            Advanced: My Money Box
+          </span>
+          <svg class="w-5 h-5 text-slate-400 transition-transform duration-300 group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </summary>
+        
+        <div class="p-5 pt-0 border-t border-slate-50 mt-1">
+          <div class="flex justify-between items-end mb-4 gap-2">
+            <p class="text-xs text-slate-500">Specify your inventory. Calculations will respect these limits.</p>
+            <div class="flex flex-col gap-1.5 shrink-0">
+              <button onclick="setAllInf()" class="text-[10px] uppercase tracking-wider font-bold text-blue-700 bg-blue-50 px-2 py-1.5 rounded hover:bg-blue-100 active:scale-95 transition-all w-full text-center">Set All ∞</button>
+              <button onclick="setAllZero()" class="text-[10px] uppercase tracking-wider font-bold text-slate-600 bg-slate-100 px-2 py-1.5 rounded hover:bg-slate-200 active:scale-95 transition-all w-full text-center">Set All 0</button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2" id="denoms"></div>
+        </div>
+      </details>
+    </div>
+
+    <!-- RIGHT COLUMN: Table Output -->
+    <div class="lg:col-span-7 flex flex-col pb-12 lg:pb-0">
+      <section id="tableSection" class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden h-full flex flex-col">
+        <div class="p-4 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between shrink-0">
+          <h3 class="font-semibold text-slate-700 text-sm">Combinations Breakdown</h3>
+          
+          <button onclick="openModal()" class="text-[11px] bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1.5 rounded-lg font-bold uppercase tracking-wide transition-colors flex items-center gap-1.5 active:scale-95">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+            Counting Guide
+          </button>
+        </div>
+        
+        <div class="overflow-x-auto hide-scrollbar flex-grow">
+          <div id="tableContainer" class="min-w-full p-4 h-full"></div>
+        </div>
+      </section>
+    </div>
+
+  </main>
+
+  <!-- MODAL: Updated Counting Guide -->
+  <div id="guideModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm hidden p-4 transition-opacity" onclick="closeModal(event)">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden" onclick="event.stopPropagation()">
+      <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+        <h3 class="font-bold text-slate-800 flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" class="text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+          How to fill the table manually
+        </h3>
+        <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-200 transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <div class="p-5 text-sm text-slate-600">
+        <ol class="space-y-4 list-decimal ml-4 marker:text-blue-600 marker:font-bold">
+          <li><strong>Line 1:</strong> Use the maximum possible number of the largest coins <em>available in your box</em>, then the next largest, until you hit the target. (Greedy approach).</li>
+          <li><strong>Next Lines:</strong> Look at your last row from <em>right to left</em>.</li>
+          <li>Find the first column (that isn't 1p) with a count greater than 0.</li>
+          <li>Decrease that count by 1. Keep everything to its left the exact same.</li>
+          <li>
+            <strong>Fill the Remainder:</strong> Fill everything to its right using the Greedy approach from step 1.
+            <div class="mt-2 bg-amber-50 border-l-4 border-amber-400 p-3 text-amber-900 italic">
+              <strong>What if I run out of coins?</strong> 
+              If you exhaust your supply of smaller coins before reaching the total, that row is a "Dead End." Cross it out (do not record it) and return to Step 4 to find the <em>next</em> possible number to decrease.
+            </div>
+          </li>
+          <li><strong>Done:</strong> You are finished when you can no longer apply step 4, or only the 1p column has a value.</li>
+        </ol>
+      </div>
+      <div class="p-4 border-t border-slate-100 bg-slate-50 flex justify-end">
+        <button onclick="closeModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-5 rounded-lg transition-colors">Got it</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const denominations = [
+      { name: "£20", value: 2000 }, { name: "£10", value: 1000 },
+      { name: "£5", value: 500 }, { name: "£2", value: 200 },
+      { name: "£1", value: 100 }, { name: "50p", value: 50 },
+      { name: "20p", value: 20 }, { name: "10p", value: 10 },
+      { name: "5p", value: 5 }, { name: "2p", value: 2 },
+      { name: "1p", value: 1 }
+    ];
+
+    const slider = document.getElementById("amountSlider");
+    const input = document.getElementById("amountInput");
+    const label = document.getElementById("amountLabel");
+    const resultCount = document.getElementById("resultCount");
+    const denomContainer = document.getElementById("denoms");
+    const tableContainer = document.getElementById("tableContainer");
+
+    const btnMinus = document.getElementById("btnMinus");
+    const btnPlus = document.getElementById("btnPlus");
+    
+    // Modal Management
+    const guideModal = document.getElementById("guideModal");
+    window.openModal = function() { guideModal.classList.remove('hidden'); }
+    window.closeModal = function() { guideModal.classList.add('hidden'); }
+    document.addEventListener('keydown', (e) => { if (e.key === "Escape") closeModal(); });
+
+    // State
+    const coinState = {};
+    denominations.forEach(d => {
+      coinState[d.value] = { value: d.value, name: d.name, isInf: true, count: 0 };
+    });
+
+    function renderDenoms() {
+      denomContainer.innerHTML = "";
+      denominations.forEach(d => {
+        const state = coinState[d.value];
+        const rowHTML = `
+          <div id="row_${d.value}" class="flex items-center justify-between p-2 bg-white rounded-xl border border-slate-200 shadow-sm transition-all ${state.isInf ? 'bg-slate-50/50' : ''}">
+            <span class="font-bold text-slate-700 w-10 text-sm pl-1">${d.name}</span>
+            <div id="stepper_${d.value}" class="flex items-center gap-0.5 transition-opacity ${state.isInf ? 'opacity-30 pointer-events-none' : ''}">
+              <button onclick="updateCoinCount(${d.value}, -1)" class="w-7 h-7 rounded bg-slate-100 text-slate-600 hover:bg-slate-200 active:scale-95 font-bold text-lg flex justify-center items-center pb-0.5">−</button>
+              <input type="number" id="count_${d.value}" value="${state.count}" min="0" onchange="manualCoinCount(${d.value}, this.value)" class="w-10 h-7 text-center bg-transparent border-0 text-slate-800 font-bold focus:ring-0 p-0 text-sm">
+              <button onclick="updateCoinCount(${d.value}, 1)" class="w-7 h-7 rounded bg-slate-100 text-slate-600 hover:bg-slate-200 active:scale-95 font-bold text-lg flex justify-center items-center pb-0.5">+</button>
+            </div>
+            <label class="flex items-center gap-2 cursor-pointer pr-1">
+              <input type="checkbox" class="peer sr-only" ${state.isInf ? 'checked' : ''} onchange="toggleInf(${d.value}, this.checked)">
+              <div class="w-10 h-7 flex items-center justify-center rounded-md border-2 border-slate-200 peer-checked:border-blue-500 peer-checked:bg-blue-100 peer-checked:text-blue-700 text-slate-400 font-bold text-lg transition-all shadow-sm">∞</div>
+            </label>
+          </div>
+        `;
+        denomContainer.insertAdjacentHTML('beforeend', rowHTML);
+      });
+    }
+
+    window.updateCoinCount = (val, delta) => {
+      if (coinState[val].isInf) return;
+      coinState[val].count = Math.max(0, coinState[val].count + delta);
+      document.getElementById(`count_${val}`).value = coinState[val].count;
+      updateAll();
+    };
+
+    window.manualCoinCount = (val, raw) => {
+      if (coinState[val].isInf) return;
+      let parsed = parseInt(raw);
+      if (isNaN(parsed) || parsed < 0) parsed = 0;
+      coinState[val].count = parsed;
+      updateAll();
+    };
+
+    window.toggleInf = (val, checked) => {
+      coinState[val].isInf = checked;
+      renderDenoms();
+      updateAll();
+    };
+
+    window.setAllInf = () => { Object.values(coinState).forEach(s => s.isInf = true); renderDenoms(); updateAll(); };
+    window.setAllZero = () => { Object.values(coinState).forEach(s => { s.isInf = false; s.count = 0; }); renderDenoms(); updateAll(); };
+
+    function getSelected() {
+      return Object.values(coinState)
+        .map(s => ({ value: s.value, limit: s.isInf ? Infinity : s.count }))
+        .filter(o => o.limit > 0)
+        .sort((a, b) => b.value - a.value);
+    }
+
+    function updateAll() {
+      const target = parseInt(slider.value);
+      const selected = getSelected();
+      label.innerText = (target / 100).toFixed(2);
+      
+      if (selected.length === 0) {
+        resultCount.innerText = "0";
+        tableContainer.innerHTML = `<div class="h-full flex items-center justify-center"><p class="text-sm text-slate-500 py-8 text-center">Your money box is empty.</p></div>`;
+        return;
+      }
+
+      // Calculation logic
+      let dp = new Array(target + 1).fill(0);
+      dp[0] = 1;
+      for (let coinObj of selected) {
+        const coin = coinObj.value;
+        const limit = coinObj.limit;
+        if (limit === Infinity) {
+          for (let i = coin; i <= target; i++) dp[i] += dp[i - coin];
+        } else {
+          let next_dp = new Array(target + 1).fill(0);
+          for (let i = 0; i <= target; i++) {
+            let val = dp[i];
+            if (i >= coin) val += next_dp[i - coin];
+            if (i >= coin * (limit + 1)) val -= dp[i - coin * (limit + 1)];
+            next_dp[i] = val;
+          }
+          dp = next_dp;
+        }
+      }
+      
+      resultCount.innerText = dp[target].toLocaleString();
+      buildTable(target, selected);
+    }
+
+    function buildTable(target, selected) {
+      if (target > 100) { 
+        tableContainer.innerHTML = `<div class="h-full flex flex-col items-center justify-center p-8 text-center text-slate-400"><svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" class="mb-3"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><p class="text-sm">Table disabled for amounts over £1.00</p></div>`; 
+        return; 
+      }
+      
+      const denoms = selected.filter(v => v.value <= 100);
+      const results = [];
+      function backtrack(rem, i, counts) {
+        if (results.length > 5000) return;
+        if (i === denoms.length) { if (rem === 0) results.push([...counts]); return; }
+        const max = Math.min(Math.floor(rem / denoms[i].value), denoms[i].limit);
+        for (let c = max; c >= 0; c--) {
+          counts[i] = c;
+          backtrack(rem - c * denoms[i].value, i + 1, counts);
+        }
+      }
+      backtrack(target, 0, new Array(denoms.length).fill(0));
+
+      if (results.length === 0) {
+        tableContainer.innerHTML = `<div class="h-full flex items-center justify-center text-slate-500 text-sm">No combinations possible with these limits.</div>`;
+        return;
+      }
+
+      let html = `<table class="w-full text-sm text-center border-collapse"><thead><tr class="border-b-2 border-slate-200">
+                    <th class="pb-2 font-bold text-slate-700 bg-white sticky left-0 z-10 w-8">#</th>`;
+      denoms.forEach(v => { html += `<th class="pb-2 px-1 text-slate-600">${v.value>=100?"£1":v.value+"p"}</th>`; });
+      html += `</tr></thead><tbody class="divide-y divide-slate-100">`;
+      results.forEach((row, i) => {
+        html += `<tr class="${i%2===0?'bg-white':'bg-slate-50/50'}">
+                  <td class="py-2 text-slate-400 font-mono text-[10px] bg-inherit sticky left-0">${i+1}</td>`;
+        row.forEach(v => { html += `<td class="py-2 ${v===0?'text-slate-200':'text-slate-700 font-medium'}">${v===0?'-':v}</td>`; });
+        html += `</tr>`;
+      });
+      tableContainer.innerHTML = html + "</tbody></table>";
+    }
+
+    slider.addEventListener("input", () => { input.value = (slider.value / 100).toFixed(2); updateAll(); });
+    input.addEventListener("input", () => { 
+      let v = Math.max(0.01, Math.min(20, parseFloat(input.value) || 0));
+      slider.value = Math.round(v * 100); 
+      updateAll(); 
+    });
+    btnMinus.addEventListener("click", () => { slider.value--; input.value = (slider.value/100).toFixed(2); updateAll(); });
+    btnPlus.addEventListener("click", () => { slider.value++; input.value = (slider.value/100).toFixed(2); updateAll(); });
+
+    renderDenoms();
+    updateAll();
+  </script>
+</body>
+</html>
