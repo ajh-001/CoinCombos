@@ -134,8 +134,8 @@
 
   <!-- MODAL: Updated Counting Guide -->
   <div id="guideModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm hidden p-4 transition-opacity" onclick="closeModal(event)">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden" onclick="event.stopPropagation()">
-      <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col" onclick="event.stopPropagation()">
+      <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50 shrink-0">
         <h3 class="font-bold text-slate-800 flex items-center gap-2">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" class="text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
           How to fill the table manually
@@ -144,23 +144,10 @@
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
         </button>
       </div>
-      <div class="p-5 text-sm text-slate-600">
-        <ol class="space-y-4 list-decimal ml-4 marker:text-blue-600 marker:font-bold">
-          <li><strong>Line 1:</strong> Use the maximum possible number of the largest coins <em>available in your box</em>, then the next largest, until you hit the target. (Greedy approach).</li>
-          <li><strong>Next Lines:</strong> Look at your last row from <em>right to left</em>.</li>
-          <li>Find the first column (that isn't 1p) with a count greater than 0.</li>
-          <li>Decrease that count by 1. Keep everything to its left the exact same.</li>
-          <li>
-            <strong>Fill the Remainder:</strong> Fill everything to its right using the Greedy approach from step 1.
-            <div class="mt-2 bg-amber-50 border-l-4 border-amber-400 p-3 text-amber-900 italic">
-              <strong>What if I run out of coins?</strong> 
-              If you exhaust your supply of smaller coins before reaching the total, that row is a "Dead End." Cross it out (do not record it) and return to Step 4 to find the <em>next</em> possible number to decrease.
-            </div>
-          </li>
-          <li><strong>Done:</strong> You are finished when you can no longer apply step 4, or only the 1p column has a value.</li>
-        </ol>
+      <div class="p-5 overflow-y-auto bg-slate-100 flex justify-center">
+        <img src="flowchart.jpg" alt="Counting Guide Flowchart" class="max-w-full h-auto rounded shadow-sm border border-slate-200">
       </div>
-      <div class="p-4 border-t border-slate-100 bg-slate-50 flex justify-end">
+      <div class="p-4 border-t border-slate-100 bg-slate-50 flex justify-end shrink-0">
         <button onclick="closeModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-5 rounded-lg transition-colors">Got it</button>
       </div>
     </div>
