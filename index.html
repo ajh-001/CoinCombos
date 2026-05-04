@@ -11,6 +11,12 @@
     .hide-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
     .hide-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     
+    /* Custom scrollbars for the zoomed image container */
+    .custom-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
     /* Hide native number input arrows for a cleaner custom UI */
     input[type=number]::-webkit-inner-spin-button, 
     input[type=number]::-webkit-outer-spin-button { 
@@ -86,7 +92,6 @@
       </section>
 
       <!-- 3. Rolled-up Money Box Card -->
-      <!-- Removed the 'open' attribute from the details tag below -->
       <details class="group bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
         <summary class="flex justify-between items-center cursor-pointer p-5 font-semibold text-slate-700 list-none [&::-webkit-details-marker]:hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-500">
           <span class="flex items-center gap-2">
@@ -132,9 +137,9 @@
 
   </main>
 
-  <!-- MODAL: Updated Counting Guide -->
+  <!-- MODAL: Updated Counting Guide with Zoom/Pan -->
   <div id="guideModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm hidden p-4 transition-opacity" onclick="closeModal(event)">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col" onclick="event.stopPropagation()">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-5xl w-full h-[90vh] overflow-hidden flex flex-col" onclick="event.stopPropagation()">
       <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50 shrink-0">
         <h3 class="font-bold text-slate-800 flex items-center gap-2">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" class="text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
@@ -144,9 +149,25 @@
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
         </button>
       </div>
-      <div class="p-5 overflow-y-auto bg-slate-100 flex justify-center">
-        <img src="flowchart.jpg" alt="Counting Guide Flowchart" class="max-w-full h-auto rounded shadow-sm border border-slate-200">
+      
+      <div class="relative flex-grow overflow-hidden bg-slate-100 flex flex-col">
+        <!-- Floating Zoom Controls -->
+        <div class="absolute bottom-4 right-4 z-10 flex items-center gap-1 bg-white/90 backdrop-blur shadow-md border border-slate-200 rounded-lg p-1.5">
+          <button onclick="zoomImage(-0.25)" aria-label="Zoom Out" class="w-8 h-8 flex items-center justify-center text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded active:scale-95 transition-all focus:outline-none">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          </button>
+          <div class="w-[1px] h-5 bg-slate-300 mx-1"></div>
+          <button onclick="zoomImage(0.25)" aria-label="Zoom In" class="w-8 h-8 flex items-center justify-center text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded active:scale-95 transition-all focus:outline-none">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          </button>
+        </div>
+        
+        <!-- Pan & Zoom Image Container -->
+        <div class="overflow-auto w-full h-full p-4 md:p-6 custom-scrollbar">
+          <img id="guideImage" src="flowchart.jpg" alt="Counting Guide Flowchart" class="max-w-none h-auto transition-[width] duration-200 ease-out block rounded shadow-sm border border-slate-200 mx-auto" style="width: 100%;">
+        </div>
       </div>
+
       <div class="p-4 border-t border-slate-100 bg-slate-50 flex justify-end shrink-0">
         <button onclick="closeModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-5 rounded-lg transition-colors">Got it</button>
       </div>
@@ -173,10 +194,34 @@
     const btnMinus = document.getElementById("btnMinus");
     const btnPlus = document.getElementById("btnPlus");
     
+    // Zoom State
+    let currentZoom = 1;
+
     // Modal Management
     const guideModal = document.getElementById("guideModal");
-    window.openModal = function() { guideModal.classList.remove('hidden'); }
-    window.closeModal = function() { guideModal.classList.add('hidden'); }
+    const guideImage = document.getElementById("guideImage");
+
+    window.openModal = function() { 
+      guideModal.classList.remove('hidden'); 
+    }
+    
+    window.closeModal = function() { 
+      guideModal.classList.add('hidden'); 
+      // Reset zoom softly when closed
+      setTimeout(() => {
+        currentZoom = 1;
+        if(guideImage) guideImage.style.width = '100%';
+      }, 300);
+    }
+
+    window.zoomImage = function(delta) {
+      // Clamp zoom between 0.5x and 3.5x
+      currentZoom = Math.max(0.5, Math.min(3.5, currentZoom + delta));
+      if(guideImage) {
+        guideImage.style.width = (currentZoom * 100) + '%';
+      }
+    }
+
     document.addEventListener('keydown', (e) => { if (e.key === "Escape") closeModal(); });
 
     // State
